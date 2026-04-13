@@ -1,89 +1,107 @@
-package src;
-
-/** MAIN CLASS-UseCase2HotelBookingApp
- * Use Case 3:Centralized Room Inventory Management
- *
- * @author Developer
- * @version 3.0
+/**
+ * Book My Stay App
+ * Use Case 8: Booking History & Reporting
+ * @author Sri
+ * @version 8.0
  */
-import java.util.Map;
-import java.util.HashMap;
 
-// RoomInventory class (separate class)
-class RoomInventory {
+import java.util.*;
 
-    private HashMap<String, Integer> inventory;
+// Reservation Class
+class Reservation {
+    private String reservationId;
+    private String guestName;
+    private String roomType;
 
-    // Constructor
-    public RoomInventory() {
-        inventory = new HashMap<>();
+    public Reservation(String reservationId, String guestName, String roomType) {
+        this.reservationId = reservationId;
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
 
-    // Add room types
-    public void addRoomType(String roomType, int count) {
-        inventory.put(roomType, count);
-        System.out.println(roomType + " rooms added with count: " + count);
-    }
+    public String getReservationId() { return reservationId; }
+    public String getGuestName() { return guestName; }
+    public String getRoomType() { return roomType; }
 
-    // Get availability
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
-    }
-
-    // Update availability
-    public void updateAvailability(String roomType, int change) {
-        if (!inventory.containsKey(roomType)) {
-            System.out.println("Room type not found!");
-            return;
-        }
-
-        int current = inventory.get(roomType);
-        int updated = current + change;
-
-        if (updated < 0) {
-            System.out.println("Not enough rooms available!");
-        } else {
-            inventory.put(roomType, updated);
-            System.out.println(roomType + " updated. New count: " + updated);
-        }
-    }
-
-    // Display inventory
-    public void displayInventory() {
-        System.out.println("\n--- Current Room Inventory ---");
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue());
-        }
+    public void display() {
+        System.out.println("ID: " + reservationId +
+                " | Guest: " + guestName +
+                " | Room: " + roomType);
     }
 }
 
+// Booking History
+class BookingHistory {
+    private List<Reservation> history = new ArrayList<>();
 
-// Main class
-public class UseCase3HotelBookingApp {
+    public void addReservation(Reservation r) {
+        history.add(r);
+    }
+
+    public List<Reservation> getAllReservations() {
+        return history;
+    }
+}
+
+// Report Service
+class BookingReportService {
+
+    public void displayAllBookings(List<Reservation> reservations) {
+        System.out.println("\n--- Booking History ---\n");
+
+        if (reservations.isEmpty()) {
+            System.out.println("No bookings found.");
+            return;
+        }
+
+        for (Reservation r : reservations) {
+            r.display();
+        }
+    }
+
+    public void generateSummary(List<Reservation> reservations) {
+        System.out.println("\n--- Booking Summary ---\n");
+
+        Map<String, Integer> summary = new HashMap<>();
+
+        for (Reservation r : reservations) {
+            summary.put(r.getRoomType(),
+                    summary.getOrDefault(r.getRoomType(), 0) + 1);
+        }
+
+        for (String type : summary.keySet()) {
+            System.out.println(type + " Bookings: " + summary.get(type));
+        }
+
+        System.out.println("Total Bookings: " + reservations.size());
+    }
+}
+
+// Main Class
+class UseCase8BookingHistoryReport {
+
     public static void main(String[] args) {
 
-        // Initialize system
-        RoomInventory inventory = new RoomInventory();
+        System.out.println("==========================================");
+        System.out.println("        BOOK MY STAY APPLICATION          ");
+        System.out.println("==========================================");
+        System.out.println("Version : v8.0");
+        System.out.println("------------------------------------------");
 
-        // Register rooms
-        inventory.addRoomType("Single", 10);
-        inventory.addRoomType("Double", 5);
-        inventory.addRoomType("Suite", 2);
+        BookingHistory history = new BookingHistory();
 
-        // Display inventory
-        inventory.displayInventory();
+        // Simulate confirmed bookings
+        history.addReservation(new Reservation("SR-101", "Alice", "Single Room"));
+        history.addReservation(new Reservation("DR-102", "Bob", "Double Room"));
+        history.addReservation(new Reservation("SR-103", "Charlie", "Single Room"));
 
-        // Simulate booking
-        inventory.updateAvailability("Single", -3);
+        // Reporting
+        BookingReportService reportService = new BookingReportService();
 
-        // Simulate cancellation
-        inventory.updateAvailability("Double", 2);
+        reportService.displayAllBookings(history.getAllReservations());
+        reportService.generateSummary(history.getAllReservations());
 
-        // Check availability
-        System.out.println("\nAvailable Single rooms: " +
-                inventory.getAvailability("Single"));
-
-        // Final state
-        inventory.displayInventory();
+        System.out.println("\n==========================================");
+        System.out.println("Reporting completed successfully.");
     }
 }
